@@ -35,7 +35,15 @@ export async function login(
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: 60 * 60 * 24,
+    maxAge: 60 * 30, // 30m — matches JWT_EXPIRES_IN=30m
+    path: "/",
+  })
+
+  cookieStore.set("refresh_token", res.refresh_token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 7, // 7d — matches REFRESH_TOKEN_EXPIRES_IN=7d
     path: "/",
   })
 
@@ -67,6 +75,7 @@ export async function login(
 export async function logout() {
   const cookieStore = await cookies()
   cookieStore.delete("access_token")
+  cookieStore.delete("refresh_token")
   cookieStore.delete("user")
   redirect("/login")
 }
