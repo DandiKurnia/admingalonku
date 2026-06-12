@@ -59,7 +59,11 @@ type FormMode =
   | { type: "create" }
   | { type: "edit"; device: Device };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (typeof window !== "undefined" && window.location.hostname.endsWith("galonku.my.id")
+    ? "https://api.galonku.my.id"
+    : "http://localhost:3000");
 
 function statusDeviceStyle(status: string) {
   const s = status?.toUpperCase();

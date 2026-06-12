@@ -42,7 +42,11 @@ export function NavUser({
     .toUpperCase()
     .slice(0, 2)
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    (typeof window !== "undefined" && window.location.hostname.endsWith("galonku.my.id")
+      ? "https://api.galonku.my.id"
+      : "http://localhost:3000")
   const avatarUrl = user.avatar
     ? user.avatar.startsWith("http")
       ? user.avatar
