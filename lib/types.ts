@@ -28,6 +28,13 @@ export interface LoginResponse {
   user: User
 }
 
+export interface AddressDevice {
+  id?: number
+  name: string
+  status: string
+  device_code?: string
+}
+
 export interface Address {
   id: number
   name: string
@@ -36,6 +43,7 @@ export interface Address {
   longitude: number
   created_at: string
   updated_at: string
+  devices?: AddressDevice[]
 }
 
 export interface Device {
@@ -46,6 +54,7 @@ export interface Device {
   status: string
   last_active: string
   address_id: number
+  address?: Address
   created_at: string
   updated_at: string
 }
@@ -73,6 +82,45 @@ export interface Transaction {
   created_at: string
   updated_at: string
   payment?: Payment
+  device?: Device
+  user?: User
+}
+
+export interface WaterFillLog {
+  id: number
+  transaction_id: number
+  amount: number
+  filled_at: string
+  created_at: string
+  updated_at: string
+}
+
+export interface TransactionHistory {
+  id: number
+  transaction_id: number
+  status: string
+  note?: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface TransactionDetail extends Transaction {
+  water_fill_logs?: WaterFillLog[]
+  transaction_histories?: TransactionHistory[]
+}
+
+export interface ProfileUpdateInput {
+  name?: string
+  email?: string
+  password?: string
+  phone_number?: string
+  avatar?: File
+}
+
+export interface TransactionStats {
+  date: string
+  total_galon: number
+  total_price: number
 }
 
 export interface ApiResponse<T> {

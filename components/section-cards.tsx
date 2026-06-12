@@ -1,6 +1,7 @@
 "use client"
 
-import { Badge } from "@/components/ui/badge"
+import { useTransactionSummary } from "@/hooks/use-transactions"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Card,
   CardAction,
@@ -9,101 +10,93 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { TrendingUpIcon, TrendingDownIcon } from "lucide-react"
+import { HardDriveIcon, DollarSignIcon, ShoppingBagIcon, RefreshCwIcon } from "lucide-react"
 
-export function SectionCards() {
+export function SectionCards({ addressId }: { addressId?: number }) {
+  const { data, isLoading } = useTransactionSummary(addressId)
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+        {[0, 1, 2, 3].map((i) => (
+          <Skeleton key={i} className="h-32 w-full rounded-xl" />
+        ))}
+      </div>
+    )
+  }
+
+  const revenue = data?.total_revenue ?? 0
+  const galons = data?.total_galons ?? 0
+  const transactions = data?.total_transactions ?? 0
+  const devices = data?.total_devices ?? 0
+
   return (
     <div className="grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-linear-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Total Revenue</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            $1,250.00
+            Rp {revenue.toLocaleString("id-ID")}
           </CardTitle>
           <CardAction>
-            <Badge variant="outline">
-              <TrendingUpIcon
-              />
-              +12.5%
-            </Badge>
+            <DollarSignIcon className="size-5 text-primary opacity-80" />
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Trending up this month{" "}
-            <TrendingUpIcon className="size-4" />
-          </div>
           <div className="text-muted-foreground">
-            Visitors for the last 6 months
+            Total omset pendapatan kedai
           </div>
         </CardFooter>
       </Card>
+
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>New Customers</CardDescription>
+          <CardDescription>Total Galons Sold</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            1,234
+            {galons.toLocaleString("id-ID")} galon
           </CardTitle>
           <CardAction>
-            <Badge variant="outline">
-              <TrendingDownIcon
-              />
-              -20%
-            </Badge>
+            <ShoppingBagIcon className="size-5 text-primary opacity-80" />
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Down 20% this period{" "}
-            <TrendingDownIcon className="size-4" />
-          </div>
           <div className="text-muted-foreground">
-            Acquisition needs attention
+            Total akumulasi air terisi
           </div>
         </CardFooter>
       </Card>
+
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Active Accounts</CardDescription>
+          <CardDescription>Total Transactions</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            45,678
+            {transactions.toLocaleString("id-ID")}
           </CardTitle>
           <CardAction>
-            <Badge variant="outline">
-              <TrendingUpIcon
-              />
-              +12.5%
-            </Badge>
+            <RefreshCwIcon className="size-5 text-primary opacity-80" />
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Strong user retention{" "}
-            <TrendingUpIcon className="size-4" />
+          <div className="text-muted-foreground">
+            Jumlah transaksi sukses (PAID)
           </div>
-          <div className="text-muted-foreground">Engagement exceed targets</div>
         </CardFooter>
       </Card>
+
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Growth Rate</CardDescription>
+          <CardDescription>Active Devices</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            4.5%
+            {devices.toLocaleString("id-ID")} unit
           </CardTitle>
           <CardAction>
-            <Badge variant="outline">
-              <TrendingUpIcon
-              />
-              +4.5%
-            </Badge>
+            <HardDriveIcon className="size-5 text-primary opacity-80" />
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Steady performance increase{" "}
-            <TrendingUpIcon className="size-4" />
+          <div className="text-muted-foreground">
+            Dispenser pintar aktif terpasang
           </div>
-          <div className="text-muted-foreground">Meets growth projections</div>
         </CardFooter>
       </Card>
     </div>

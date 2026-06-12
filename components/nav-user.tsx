@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import {
   Avatar,
   AvatarFallback,
@@ -93,7 +94,7 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem render={<Link href="/profile" />}>
                 <CircleUserRoundIcon />
                 Account
               </DropdownMenuItem>

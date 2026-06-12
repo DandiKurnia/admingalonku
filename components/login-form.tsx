@@ -13,7 +13,6 @@ import {
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { login } from "@/lib/auth";
-import { redirect } from "next/navigation";
 
 export function LoginForm({
   className,
@@ -34,7 +33,7 @@ export function LoginForm({
     try {
       const result = await login(email, password);
       if (result.success) {
-        redirect("/");
+        window.location.href = "/";
       } else {
         setError(result.error || "Login failed");
       }

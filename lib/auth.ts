@@ -17,6 +17,10 @@ export async function login(
       body: JSON.stringify({ email, password }),
     })
     console.log("DEBUG LOGIN API RESPONSE:", JSON.stringify(res))
+
+    if (res.user?.role?.key === "customer" || res.user?.role?.key === "Customer") {
+      return { success: false, error: "Invalid email or password" }
+    }
   } catch (err) {
     console.error("DEBUG LOGIN API ERROR:", err)
     return {

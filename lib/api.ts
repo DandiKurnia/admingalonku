@@ -6,8 +6,11 @@ export async function apiFetch<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
+  const isFormData =
+    typeof FormData !== "undefined" && options.body instanceof FormData
+
   const headers: HeadersInit = {
-    "Content-Type": "application/json",
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...options.headers,
   }
 

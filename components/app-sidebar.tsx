@@ -19,7 +19,7 @@ import {
   HardDriveIcon,
   MapPinIcon,
   ReceiptIcon,
-  CreditCardIcon,
+  UsersIcon,
   ShieldIcon,
   Settings2Icon,
   CircleHelpIcon,
@@ -46,7 +46,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       })
     }
 
-    if (hasPermission("addresses.read")) {
+    if (hasPermission("addresses.read") && isRole("super-admin")) {
       items.push({
         title: "Addresses",
         url: "/addresses",
@@ -62,14 +62,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       })
     }
 
-    if (hasPermission("payments.read")) {
-      items.push({
-        title: "Payments",
-        url: "/payments",
-        icon: <CreditCardIcon />,
-      })
-    }
-
     if (hasPermission("water_fill_logs.read")) {
       items.push({
         title: "Water Fill Logs",
@@ -79,6 +71,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
 
     if (isRole("super-admin")) {
+      items.push({
+        title: "Users",
+        url: "/users",
+        icon: <UsersIcon />,
+      })
       items.push({
         title: "Roles & Permissions",
         url: "/roles",

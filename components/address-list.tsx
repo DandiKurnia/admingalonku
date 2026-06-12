@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import {
   useAddresses,
@@ -31,7 +32,16 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Skeleton } from "@/components/ui/skeleton"
-import { PlusIcon, PencilIcon, Trash2Icon, MapPinIcon } from "lucide-react"
+import {
+  PlusIcon,
+  PencilIcon,
+  Trash2Icon,
+  MapPinIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "lucide-react"
+
+const PAGE_SIZE = 10
 
 type FormMode =
   | { type: "closed" }
@@ -39,6 +49,7 @@ type FormMode =
   | { type: "edit"; address: Address }
 
 export function AddressList() {
+  const router = useRouter()
   const { hasPermission } = useAuth()
   const canCreate = hasPermission("addresses.create")
   const canUpdate = hasPermission("addresses.update")
@@ -47,7 +58,21 @@ export function AddressList() {
   const { data, isLoading, error } = useAddresses()
   const [mode, setMode] = React.useState<FormMode>({ type: "closed" })
   const [deleteId, setDeleteId] = React.useState<number | null>(null)
+  const [page, setPage] = React.useState(1)
   const deleteMutation = useDeleteAddress()
+
+  const total = data?.length ?? 0
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const safePage = Math.min(page, totalPages)
+  const start = (safePage - 1) * PAGE_SIZE
+  const pageRows = React.useMemo(
+    () => (data ?? []).slice(start, start + PAGE_SIZE),
+    [data, start]
+  )
+
+  React.useEffect(() => {
+    if (page > totalPages) setPage(totalPages)
+  }, [page, totalPages])
 
   async function handleDelete() {
     if (deleteId == null) return
@@ -81,7 +106,7 @@ export function AddressList() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-16">ID</TableHead>
+              <TableHead className="w-16">No</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Address</TableHead>
               <TableHead>Coordinates</TableHead>
@@ -110,7 +135,7 @@ export function AddressList() {
                 </TableCell>
               </TableRow>
             )}
-            {!isLoading && data?.length === 0 && (
+            {!isLoading && total === 0 && (
               <TableRow>
                 <TableCell
                   colSpan={5}
@@ -121,9 +146,15 @@ export function AddressList() {
                 </TableCell>
               </TableRow>
             )}
-            {data?.map((row) => (
-              <TableRow key={row.id}>
-                <TableCell className="font-mono text-xs">{row.id}</TableCell>
+            {pageRows.map((row, index) => (
+              <TableRow
+                key={row.id}
+                className="cursor-pointer hover:bg-muted/50"
+                onClick={() => router.push(`/addresses/${row.id}`)}
+              >
+                <TableCell className="font-mono text-xs text-muted-foreground">
+                  {start + index + 1}
+                </TableCell>
                 <TableCell className="font-medium">{row.name}</TableCell>
                 <TableCell className="text-muted-foreground">
                   {row.address}
@@ -131,7 +162,10 @@ export function AddressList() {
                 <TableCell className="font-mono text-xs text-muted-foreground">
                   {row.latitude?.toFixed(4)}, {row.longitude?.toFixed(4)}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell
+                  className="text-right"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <div className="flex justify-end gap-1">
                     {canUpdate && (
                       <Button
@@ -162,6 +196,38 @@ export function AddressList() {
           </TableBody>
         </Table>
       </div>
+
+      {total > 0 && (
+        <div className="mt-3 flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">
+            Showing {total === 0 ? 0 : start + 1}–
+            {Math.min(start + PAGE_SIZE, total)} of {total}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={safePage <= 1}
+            >
+              <ChevronLeftIcon />
+              Previous
+            </Button>
+            <span className="px-2 text-muted-foreground">
+              Page {safePage} of {totalPages}
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={safePage >= totalPages}
+            >
+              Next
+              <ChevronRightIcon />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <AddressFormSheet
         mode={mode}
