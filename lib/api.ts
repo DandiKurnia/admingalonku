@@ -2,6 +2,13 @@ import type { ApiResponse } from "./types"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
 
+export class AuthError extends Error {
+  constructor(message = "Unauthorized") {
+    super(message)
+    this.name = "AuthError"
+  }
+}
+
 export async function apiFetch<T>(
   endpoint: string,
   options: RequestInit = {}
@@ -21,6 +28,9 @@ export async function apiFetch<T>(
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ message: "Request failed" }))
+    if (res.status === 401) {
+      throw new AuthError(error.message || "Unauthorized")
+    }
     throw new Error(error.message || `HTTP ${res.status}`)
   }
 

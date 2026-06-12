@@ -1,26 +1,40 @@
 "use server"
 
 import { cookies } from "next/headers"
+import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
-import { apiFetchData, apiFetchWithToken } from "./api"
+import { apiFetchData, apiFetchWithToken, AuthError } from "./api"
 import type { Address, ApiResponse } from "./types"
 
 async function getToken() {
   const cookieStore = await cookies()
   const token = cookieStore.get("access_token")?.value
-  if (!token) throw new Error("Unauthorized")
+  if (!token) redirect("/login")
   return token
 }
 
+function handleAuthError(err: unknown): never {
+  if (err instanceof AuthError) redirect("/login")
+  throw err
+}
+
 export async function getAddresses(limit?: number): Promise<Address[]> {
-  const token = await getToken()
-  const qs = limit ? `?limit=${limit}` : ""
-  return apiFetchData<Address[]>(`/address${qs}`, token)
+  try {
+    const token = await getToken()
+    const qs = limit ? `?limit=${limit}` : ""
+    return await apiFetchData<Address[]>(`/address${qs}`, token)
+  } catch (err) {
+    handleAuthError(err)
+  }
 }
 
 export async function getAddressById(id: number): Promise<Address> {
-  const token = await getToken()
-  return apiFetchData<Address>(`/address/${id}`, token)
+  try {
+    const token = await getToken()
+    return await apiFetchData<Address>(`/address/${id}`, token)
+  } catch (err) {
+    handleAuthError(err)
+  }
 }
 
 export interface AddressInput {
@@ -31,36 +45,48 @@ export interface AddressInput {
 }
 
 export async function createAddress(input: AddressInput): Promise<Address> {
-  const token = await getToken()
-  const res = await apiFetchWithToken<ApiResponse<Address>>("/address", token, {
-    method: "POST",
-    body: JSON.stringify(input),
-  })
-  revalidatePath("/addresses")
-  return res.data
+  try {
+    const token = await getToken()
+    const res = await apiFetchWithToken<ApiResponse<Address>>("/address", token, {
+      method: "POST",
+      body: JSON.stringify(input),
+    })
+    revalidatePath("/addresses")
+    return res.data
+  } catch (err) {
+    handleAuthError(err)
+  }
 }
 
 export async function updateAddress(
   id: number,
   input: Partial<AddressInput>
 ): Promise<Address> {
-  const token = await getToken()
-  const res = await apiFetchWithToken<ApiResponse<Address>>(
-    `/address/${id}`,
-    token,
-    {
-      method: "PATCH",
-      body: JSON.stringify(input),
-    }
-  )
-  revalidatePath("/addresses")
-  return res.data
+  try {
+    const token = await getToken()
+    const res = await apiFetchWithToken<ApiResponse<Address>>(
+      `/address/${id}`,
+      token,
+      {
+        method: "PATCH",
+        body: JSON.stringify(input),
+      }
+    )
+    revalidatePath("/addresses")
+    return res.data
+  } catch (err) {
+    handleAuthError(err)
+  }
 }
 
 export async function deleteAddress(id: number): Promise<void> {
-  const token = await getToken()
-  await apiFetchWithToken<ApiResponse<null>>(`/address/${id}`, token, {
-    method: "DELETE",
-  })
-  revalidatePath("/addresses")
+  try {
+    const token = await getToken()
+    await apiFetchWithToken<ApiResponse<null>>(`/address/${id}`, token, {
+      method: "DELETE",
+    })
+    revalidatePath("/addresses")
+  } catch (err) {
+    handleAuthError(err)
+  }
 }

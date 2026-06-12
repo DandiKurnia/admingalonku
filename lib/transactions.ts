@@ -1,39 +1,57 @@
 "use server"
 
 import { cookies } from "next/headers"
-import { apiFetchData } from "./api"
+import { redirect } from "next/navigation"
+import { apiFetchData, AuthError } from "./api"
 import type { Transaction, TransactionDetail, TransactionStats } from "./types"
 
 async function getToken() {
   const cookieStore = await cookies()
   const token = cookieStore.get("access_token")?.value
-  if (!token) throw new Error("Unauthorized")
+  if (!token) redirect("/login")
   return token
 }
 
+function handleAuthError(err: unknown): never {
+  if (err instanceof AuthError) redirect("/login")
+  throw err
+}
+
 export async function getTransactions(): Promise<Transaction[]> {
-  const token = await getToken()
-  return apiFetchData<Transaction[]>("/transactions", token)
+  try {
+    const token = await getToken()
+    return await apiFetchData<Transaction[]>("/transactions", token)
+  } catch (err) {
+    handleAuthError(err)
+  }
 }
 
 export async function getTransactionById(
   id: number
 ): Promise<TransactionDetail> {
-  const token = await getToken()
-  return apiFetchData<TransactionDetail>(`/transactions/${id}`, token)
+  try {
+    const token = await getToken()
+    return await apiFetchData<TransactionDetail>(`/transactions/${id}`, token)
+  } catch (err) {
+    handleAuthError(err)
+  }
 }
 
 export async function getTransactionStats(
   groupBy: "daily" | "monthly" = "daily",
   addressId?: number
 ): Promise<TransactionStats[]> {
-  const token = await getToken()
-  const params = new URLSearchParams({ groupBy })
-  if (addressId) params.set("addressId", String(addressId))
-  return apiFetchData<TransactionStats[]>(
-    `/transactions/stats?${params}`,
-    token
-  )
+  try {
+    const token = await getToken()
+    const params = new URLSearchParams({ groupBy })
+    if (addressId) params.set("addressId", String(addressId))
+    return await apiFetchData<TransactionStats[]>(
+      `/transactions/stats?${params}`,
+      token
+    )
+  } catch (err) {
+    handleAuthError(err)
+  }
 }
 
 export interface DashboardSummary {
@@ -46,11 +64,15 @@ export interface DashboardSummary {
 export async function getTransactionSummary(
   addressId?: number
 ): Promise<DashboardSummary> {
-  const token = await getToken()
-  const params = new URLSearchParams()
-  if (addressId) params.set("addressId", String(addressId))
-  return apiFetchData<DashboardSummary>(
-    `/transactions/summary?${params}`,
-    token
-  )
+  try {
+    const token = await getToken()
+    const params = new URLSearchParams()
+    if (addressId) params.set("addressId", String(addressId))
+    return await apiFetchData<DashboardSummary>(
+      `/transactions/summary?${params}`,
+      token
+    )
+  } catch (err) {
+    handleAuthError(err)
+  }
 }

@@ -8,6 +8,8 @@ import {
   createDevice,
   updateDevice,
   deleteDevice,
+  rotateDeviceToken,
+  revokeDeviceToken,
   type DeviceInput,
 } from "@/lib/devices"
 
@@ -68,5 +70,27 @@ export function useDeleteDevice() {
   return useMutation({
     mutationFn: (id: number) => deleteDevice(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: deviceKeys.all }),
+  })
+}
+
+export function useRotateDeviceToken() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => rotateDeviceToken(id),
+    onSuccess: (_d, id) => {
+      qc.invalidateQueries({ queryKey: deviceKeys.all })
+      qc.invalidateQueries({ queryKey: deviceKeys.detail(id) })
+    },
+  })
+}
+
+export function useRevokeDeviceToken() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => revokeDeviceToken(id),
+    onSuccess: (_d, id) => {
+      qc.invalidateQueries({ queryKey: deviceKeys.all })
+      qc.invalidateQueries({ queryKey: deviceKeys.detail(id) })
+    },
   })
 }

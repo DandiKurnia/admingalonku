@@ -1,15 +1,21 @@
 "use server"
 
 import { cookies } from "next/headers"
+import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
-import { apiFetch, apiFetchData, apiFetchWithToken } from "./api"
+import { apiFetch, apiFetchData, apiFetchWithToken, AuthError } from "./api"
 import type { ApiResponse, User } from "./types"
 
 async function getToken() {
   const cookieStore = await cookies()
   const token = cookieStore.get("access_token")?.value
-  if (!token) throw new Error("Unauthorized")
+  if (!token) redirect("/login")
   return token
+}
+
+function handleAuthError(err: unknown): never {
+  if (err instanceof AuthError) redirect("/login")
+  throw err
 }
 
 export interface RegisterUserInput {
@@ -24,23 +30,35 @@ export interface RegisterUserInput {
 export async function registerUser(
   input: RegisterUserInput
 ): Promise<ApiResponse<User>> {
-  const token = await getToken()
-  const res = await apiFetchWithToken<ApiResponse<User>>("/users", token, {
-    method: "POST",
-    body: JSON.stringify(input),
-  })
-  revalidatePath("/users")
-  return res
+  try {
+    const token = await getToken()
+    const res = await apiFetchWithToken<ApiResponse<User>>("/users", token, {
+      method: "POST",
+      body: JSON.stringify(input),
+    })
+    revalidatePath("/users")
+    return res
+  } catch (err) {
+    handleAuthError(err)
+  }
 }
 
 export async function getUsers(): Promise<User[]> {
-  const token = await getToken()
-  return apiFetchData<User[]>("/users", token)
+  try {
+    const token = await getToken()
+    return await apiFetchData<User[]>("/users", token)
+  } catch (err) {
+    handleAuthError(err)
+  }
 }
 
 export async function getUserById(id: number): Promise<User> {
-  const token = await getToken()
-  return apiFetchData<User>(`/users/${id}`, token)
+  try {
+    const token = await getToken()
+    return await apiFetchData<User>(`/users/${id}`, token)
+  } catch (err) {
+    handleAuthError(err)
+  }
 }
 
 export interface UpdateUserInput {
@@ -56,11 +74,15 @@ export async function updateUser(
   id: number,
   input: UpdateUserInput
 ): Promise<User> {
-  const token = await getToken()
-  const res = await apiFetchWithToken<ApiResponse<User>>(`/users/${id}`, token, {
-    method: "PATCH",
-    body: JSON.stringify(input),
-  })
-  revalidatePath("/users")
-  return res.data
+  try {
+    const token = await getToken()
+    const res = await apiFetchWithToken<ApiResponse<User>>(`/users/${id}`, token, {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    })
+    revalidatePath("/users")
+    return res.data
+  } catch (err) {
+    handleAuthError(err)
+  }
 }

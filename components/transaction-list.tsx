@@ -274,14 +274,30 @@ function TransactionDetailSheet({
                 </Section>
               )}
 
-              {data.water_fill_logs && data.water_fill_logs.length > 0 && (
-                <Section title="Water Fill Logs">
+              {data.transaction_details && data.transaction_details.length > 0 && (
+                <Section title="Transaction Details">
                   <ul className="space-y-1 text-sm">
-                    {data.water_fill_logs.map((log) => (
-                      <li key={log.id} className="flex justify-between">
-                        <span>{log.amount} L</span>
-                        <span className="text-muted-foreground">
-                          {new Date(log.filled_at).toLocaleString("en-US")}
+                    {data.transaction_details.map((d) => (
+                      <li
+                        key={d.id}
+                        className="flex items-center justify-between gap-2"
+                      >
+                        <span>
+                          {d.galon_qty} galon ×{" "}
+                          <span className="font-mono">
+                            {new Intl.NumberFormat("en-US", {
+                              style: "currency",
+                              currency: "IDR",
+                              maximumFractionDigits: 0,
+                            }).format(d.price_one_galon)}
+                          </span>
+                        </span>
+                        <span className="font-medium">
+                          {new Intl.NumberFormat("en-US", {
+                            style: "currency",
+                            currency: "IDR",
+                            maximumFractionDigits: 0,
+                          }).format(d.sub_total)}
                         </span>
                       </li>
                     ))}
@@ -299,9 +315,9 @@ function TransactionDetailSheet({
                             <Badge variant={statusVariant(h.status)}>
                               {h.status}
                             </Badge>
-                            {h.note && (
+                            {h.description && (
                               <span className="ml-2 text-muted-foreground">
-                                {h.note}
+                                {h.description}
                               </span>
                             )}
                           </span>
