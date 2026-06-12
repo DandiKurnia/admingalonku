@@ -2,7 +2,10 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import type { ApiResponse } from "./types"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
+const API_URL =
+  typeof window === "undefined"
+    ? (process.env.API_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000")
+    : (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000")
 
 // Backend JWT cookie lifetimes (must match backend env).
 const ACCESS_TOKEN_MAX_AGE = 60 * 30 // 30 minutes (JWT_EXPIRES_IN=30m)
