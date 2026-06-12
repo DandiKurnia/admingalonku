@@ -1,0 +1,40 @@
+name: admingalonku
+
+# Staging compose file.
+# Usage:  docker compose -f docker-compose.staging.yml up -d
+#
+# Notes:
+# - Builds the full multi-stage Dockerfile (deps -> builder -> runner).
+# - Resulting image is the minimal standalone runtime (~150 MB on Alpine).
+# - No source/bind mounts — image is self-contained.
+# - For public deployments, put a reverse proxy (nginx / caddy / traefik) in
+#   front of port 3001 for TLS termination, rate limiting, etc.
+
+services:
+  app:
+    image: dandikurnia/admingalonku:staging
+    container_name: admingalonku-staging
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    ports:
+      - "3001:3001"
+    environment:
+      TZ: Asia/Jakarta
+      NODE_ENV: production
+      APP_ENV: staging
+      PORT: 3001
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --no-verbose
+        - --tries=1
+        - --spider
+        - http://localhost:3001/
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    tmpfs:
+      - /tmp

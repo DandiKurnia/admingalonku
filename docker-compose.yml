@@ -1,0 +1,42 @@
+name: admingalonku
+
+# Development compose file.
+# Usage:  docker compose up --watch
+# Or:     docker compose up   (uses default polling, no watch)
+#
+# Notes:
+# - Source code is bind-mounted so edits on the host are reflected in the container.
+# - node_modules is kept inside the container (anonymous volume) to avoid platform
+#   mismatches between the host OS and the Linux image.
+# - Uses `next dev` with HMR for instant feedback.
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dependencies
+    image: admingalonku-dev
+    container_name: admingalonku-dev
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://host.docker.internal:3000}
+      # Required for file watching on some hosts (WSL2 / Docker Desktop on Windows)
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "true"
+    env_file:
+      - .env.development
+    volumes:
+      # Source code (live reload)
+      - ./:/app
+      # Keep container's node_modules (Linux) — prevents host's node_modules (Windows/Mac) from overwriting
+      - /app/node_modules
+      # Keep .next cache inside the container too
+      - /app/.next
+    command: sh -c "npm run dev"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

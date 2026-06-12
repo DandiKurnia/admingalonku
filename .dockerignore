@@ -1,0 +1,51 @@
+# Reduce build context — keep the image small and the build fast.
+
+# Dependencies (re-installed inside the image)
+node_modules
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Build outputs
+.next
+out
+build
+dist
+*.tsbuildinfo
+next-env.d.ts
+
+# Testing
+coverage
+
+# Env files (passed at runtime via env_file / --env-file, not baked in)
+.env
+.env.*
+!.env.example
+!.env.development
+!.env.production
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE / OS
+.DS_Store
+Thumbs.db
+.idea
+.vscode
+*.swp
+
+# Docker self-references
+Dockerfile
+Dockerfile.*
+docker-compose*.yml
+.dockerignore
+
+# Vercel
+.vercel
+
+# Misc
+*.pem
+.pnpm-store
