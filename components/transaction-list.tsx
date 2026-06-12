@@ -57,9 +57,9 @@ export function TransactionList() {
     [data, start]
   )
 
-  React.useEffect(() => {
-    if (page > totalPages) setPage(totalPages)
-  }, [page, totalPages])
+  if (page > totalPages) {
+    React.startTransition(() => setPage(totalPages))
+  }
 
   return (
     <div className="px-4 lg:px-6">

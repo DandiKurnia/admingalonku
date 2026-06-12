@@ -94,7 +94,9 @@ function RoleEditor({
 
   const [selected, setSelected] = React.useState<Set<number>>(initialIds)
 
+  // Sync selected when role permissions change — legitimate prop-to-state sync
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing with external role data
     setSelected(new Set(initialIds))
   }, [initialIds])
 

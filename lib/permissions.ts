@@ -1,14 +1,12 @@
 "use server"
 
 import { cookies } from "next/headers"
-import { apiFetchData } from "./api"
-import type { Role } from "./types"
 
-async function getToken() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get("access_token")?.value
-  if (!token) throw new Error("Unauthorized")
-  return token
+interface UserCookie {
+  role?: {
+    key?: string
+    permissions?: { key: string }[]
+  }
 }
 
 export async function checkPermission(key: string): Promise<boolean> {
@@ -17,7 +15,7 @@ export async function checkPermission(key: string): Promise<boolean> {
     const userCookie = cookieStore.get("user")?.value
     if (!userCookie) return false
 
-    let user: any
+    let user: UserCookie
     try {
       user = JSON.parse(decodeURIComponent(userCookie))
     } catch {
@@ -29,7 +27,7 @@ export async function checkPermission(key: string): Promise<boolean> {
     if (roleKey === "super-admin" || roleKey === "super_admin") return true
 
     // Check permissions stored in the cookie session
-    return user.role.permissions?.some((p: { key: string }) => p.key === key) ?? false
+    return user.role?.permissions?.some((p: { key: string }) => p.key === key) ?? false
   } catch {
     return false
   }

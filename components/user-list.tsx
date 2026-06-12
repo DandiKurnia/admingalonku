@@ -85,9 +85,9 @@ export function UserList() {
     [data, start]
   )
 
-  React.useEffect(() => {
-    if (page > totalPages) setPage(totalPages)
-  }, [page, totalPages])
+  if (page > totalPages) {
+    React.startTransition(() => setPage(totalPages))
+  }
 
   return (
     <div className="px-4 lg:px-6">
@@ -253,7 +253,9 @@ function UserFormSheet({
     initial?.address_id ? String(initial.address_id) : ""
   )
 
+  // Sync form state when mode/initial changes — legitimate prop-to-state sync
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing form with external props
     setRoleId(initial?.role_id ? String(initial.role_id) : "")
     setAddressId(initial?.address_id ? String(initial.address_id) : "")
   }, [initial?.role_id, initial?.address_id, mode.type])

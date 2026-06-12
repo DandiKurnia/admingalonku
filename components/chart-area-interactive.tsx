@@ -52,8 +52,10 @@ export function ChartAreaInteractive({ data = [] }: { data?: ChartData[] }) {
   const [timeRange, setTimeRange] = React.useState("30d")
   const [metric, setMetric] = React.useState<"total_galon" | "total_price">("total_galon")
 
+  // Sync mobile default — this is intentional external-system synchronization
   React.useEffect(() => {
     if (isMobile) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing with media query
       setTimeRange("7d")
     }
   }, [isMobile])

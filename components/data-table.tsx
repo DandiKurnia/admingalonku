@@ -356,6 +356,7 @@ export function DataTable({
     () => data?.map(({ id }) => id) || [],
     [data]
   )
+  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table API is safe here
   const table = useReactTable({
     data,
     columns,

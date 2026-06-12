@@ -70,9 +70,10 @@ export function AddressList() {
     [data, start]
   )
 
-  React.useEffect(() => {
-    if (page > totalPages) setPage(totalPages)
-  }, [page, totalPages])
+  if (page > totalPages) {
+    // Schedule the correction after render to avoid cascading renders
+    React.startTransition(() => setPage(totalPages))
+  }
 
   async function handleDelete() {
     if (deleteId == null) return

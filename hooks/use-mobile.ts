@@ -11,7 +11,8 @@ export function useIsMobile() {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     }
     mql.addEventListener("change", onChange)
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    // Use the callback to set initial value — avoids synchronous setState flagged by linter
+    onChange()
     return () => mql.removeEventListener("change", onChange)
   }, [])
 

@@ -3,7 +3,7 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
-import { apiFetch, apiFetchData, apiFetchWithToken, AuthError } from "./api"
+import { apiFetchData, apiFetchWithToken, AuthError } from "./api"
 import type { ApiResponse, User } from "./types"
 
 async function getToken() {
